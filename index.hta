@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Cricket Scoring App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('https://example.com/cricket-background.jpg'); /* Replace with the URL of your cricket image */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .scoreboard {
+            margin-bottom: 20px;
+        }
+
+        .controls button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+
+        .overs {
+            margin-bottom: 20px;
+        }
+
+        .overs input {
+            padding: 5px;
+            width: 50px;
+            text-align: center;
+        }
+
+        .message {
+            margin-top: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: green;
+        }
+
+        .reset-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .reset-button:hover {
+            background-color: #b02a37;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="scoreboard">
+            <div>Team A: <span id="teamAScore">0</span>/<span id="teamAWickets">0</span> (Overs: <span id="teamAOvers">0</span>)</div>
+            <div>Team B: <span id="teamBScore">0</span>/<span id="teamBWickets">0</span> (Overs: <span id="teamBOvers">0</span>)</div>
+        </div>
+        <div class="overs">
+            <label for="overs">Set Overs:</label>
+            <input type="number" id="overs" min="1" max="50" value="2"> <!-- Changed value to 2 -->
+            <button onclick="setOvers()">Set Overs</button>
+        </div>
+        <div class="controls">
+            <button onclick="addRuns(1)">1</button>
+            <button onclick="addRuns(2)">2</button>
+            <button onclick="addRuns(3)">3</button>
+            <button onclick="addRuns(4)">4</button>
+            <button onclick="addRuns(5)">5</button>
+            <button onclick="addRuns(6)">6</button>
+            <button onclick="recordDotBall()">Dot Ball</button>
+            <button onclick="recordWicket()">Wicket</button>
+            <button onclick="recordWideBall()">Wide Ball</button>
+            <button onclick="recordNoBall()">No Ball</button>
+        </div>
+        <button class="reset-button" onclick="resetGame()">Reset</button>
+        <div class="message" id="message"></div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+    <script>
+        let teamAScore = 0;
+        let teamAWickets = 0;
+        let teamAOvers = 0;
+        let teamABalls = 0;
+
+        let teamBScore = 0;
+        let teamBWickets = 0;
+        let teamBOvers = 0;
+        let teamBBalls = 0;
+
+        let currentTeam = 'A';
+        let totalOvers = 2; // Changed default overs to 2
+
+        function setOvers() {
+            totalOvers = document.getElementById('overs').value;
+        }
+
+        function addRuns(runs) {
+            if (currentTeam === 'A') {
+                teamAScore += runs;
+                document.getElementById('teamAScore').innerText = teamAScore;
+            } else {
+                teamBScore += runs;
+                document.getElementById('teamBScore').innerText = teamBScore;
+                checkForWinner();
+            }
+            updateOvers();
+        }
+
+        function recordDotBall() {
+            updateOvers();
+        }
+
+        function recordWicket() {
+            if (currentTeam === 'A') {
+                teamAWickets += 1;
+                document.getElementById('teamAWickets').innerText = teamAWickets;
+            } else {
+                teamBWickets += 1;
+                document.getElementById('teamBWickets').innerText = teamBWickets;
+                checkForWinner();
+            }
+            updateOvers();
+        }
+
+        function recordWideBall() {
+            if (currentTeam === 'A') {
+                teamAScore += 1;
+                document.getElementById('teamAScore').innerText = teamAScore;
+            } else {
+                teamBScore += 1;
+                document.getElementById('teamBScore').innerText = teamBScore;
+                checkForWinner();
+            }
+        }
+
+        function recordNoBall() {
+            if (currentTeam === 'A') {
+                teamAScore += 1;
+                document.getElementById('teamAScore').innerText = teamAScore;
+            } else {
+                teamBScore += 1;
+                document.getElementById('teamBScore').innerText = teamBScore;
+                checkForWinner();
+            }
+        }
+
+        function updateOvers() {
+            if (currentTeam === 'A') {
+                teamABalls++;
+                if (teamABalls === 6) {
+                    teamABalls = 0;
+                    teamAOvers++;
+                }
+                document.getElementById('teamAOvers').innerText = teamAOvers + '.' + teamABalls;
+                if (teamAOvers >= totalOvers) {
+                    currentTeam = 'B';
+                    alert('Innings over! Switch to Team B.');
+                }
+            } else {
+                teamBBalls++;
+                if (teamBBalls === 6) {
+                    teamBBalls = 0;
+                    teamBOvers++;
+                }
+                document.getElementById('teamBOvers').innerText = teamBOvers + '.' + teamBBalls;
+                if (teamBOvers >= totalOvers) {
+                    alert('Match over!');
+                    declareWinner();
+                }
+            }
+        }
+
+        function checkForWinner() {
+            if (teamBScore > teamAScore && currentTeam === 'B') {
+                alert('Team B wins!');
+                document.getElementById('message').innerText = 'Team B wins!';
+                launchConfetti();
+            }
+        }
+
+        function declareWinner() {
+            if (teamAScore > teamBScore) {
+                alert('Team A wins!');
+                document.getElementById('message').innerText = 'Team A wins!';
+                launchConfetti();
+            } else if (teamBScore > teamAScore) {
+                alert('Team B wins!');
+                document.getElementById('message').innerText = 'Team B wins!';
+                launchConfetti();
+            } else {
+                alert('Match Drawn!');
+                document.getElementById('message').innerText = 'Match Drawn!';
+            }
+        }
+
+        function launchConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function resetGame() {
+            teamAScore = 0;
+            teamAWickets = 0;
+            teamAOvers = 0;
+            teamABalls = 0;
+
+            teamBScore = 0;
+            teamBWickets = 0;
+            teamBOvers = 0;
+            teamBBalls = 0;
+
+            currentTeam = 'A';
+            totalOvers = 2; // Changed default overs to 2
+
+            document.getElementById('teamAScore').innerText = teamAScore;
+            document.getElementById('teamAWickets').innerText = teamAWickets;
+            document.getElementById('teamAOvers').innerText = teamAOvers + '.' + teamABalls;
+
+            document.getElementById('teamBScore').innerText = teamBScore;
+            document.getElementById('teamBWickets').innerText = teamBWickets;
+            document.getElementById('teamBOvers').innerText = teamBOvers + '.' + teamBBalls;
+
+            document.getElementById('overs').value = totalOvers;
+
+            document.getElementById('message').innerText = '';
+        }
+    </script>
+</body>
+</html>
